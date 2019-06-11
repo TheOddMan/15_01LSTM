@@ -13,8 +13,10 @@ from sklearn.metrics import mean_squared_error
 
 
 def make_data(s=666,r_start=-50,r_end=51,sam=50):
+
     random.seed(s)
-    x = np.array(random.sample(range(r_start,r_end), sam))
+
+    x = np.array(np.random.uniform(low=r_start,high=r_end,size=sam))
     # y = np.cos(x) + 2 * x + np.sin(x) + np.sqrt(np.power(x, 3))
     y = np.power(x,2)
 
@@ -35,7 +37,7 @@ def make_data(s=666,r_start=-50,r_end=51,sam=50):
 
     return x_r,y_r,test_x,test_y
 
-def scal_data(x,y,_plot=False):
+def scal_data(x,y,_plot=False,_scatter=True):
 
     x = x.reshape(x.shape[0],1)
 
@@ -63,6 +65,17 @@ def scal_data(x,y,_plot=False):
         plt.plot(y_scal,"o", color='orange')
 
         plt.show()
+
+    if _scatter:
+        x=x.reshape(x.shape[0])
+        plt.figure(1, figsize=(10, 11))
+
+        plt.title("origin data")
+
+        plt.scatter(x,y)
+
+        plt.show()
+
 
     x_scal = x_scal.reshape(x_scal.shape[0], 1, 1)
 
@@ -106,9 +119,9 @@ dataLen = 50
 
 x,y,test_x,test_y = make_data(s=666,r_start=-50,r_end=51,sam=dataLen)
 
-scalerX,x_scal,scalerY,y_scal = scal_data(x,y,_plot=False)
+scalerX,x_scal,scalerY,y_scal = scal_data(x,y,_plot=False,_scatter=False)
 
-test_scalerX,test_x_scal,test_scalerY,test_y_scal = scal_data(test_x,test_y,_plot=False)
+test_scalerX,test_x_scal,test_scalerY,test_y_scal = scal_data(test_x,test_y,_plot=False,_scatter=False)
 
 model = build_model()
 
@@ -121,15 +134,32 @@ yhat = trained_model.predict(x_scal)
 mseResult = mean_squared_error(y_scal,yhat)
 print("Mse of training data : ",round(mseResult,5))
 plt.figure(1)
-plt.subplot(211)
+plt.subplot(411)
 plt.plot(y_scal,color="blue",label='desired value')
 plt.plot(yhat,color='orange',label='predicted value')
 plt.legend(loc='upper right')
 plt.title("zero mean range")
 
+plt.subplot(412)
+
+x_scal = x_scal.reshape(x_scal.shape[0])
+
+plt.scatter(x_scal,y_scal,color="blue",s=2)
+plt.scatter(x_scal,yhat,color='orange',s=2)
+plt.title("zero mean range scatter")
+
+
 yhat = scalerY.inverse_transform(yhat)
 
-plt.subplot(212)
+plt.subplot(413)
+
+x = x.reshape(x.shape[0])
+
+plt.scatter(x,y,color="blue",s=2)
+plt.scatter(x,yhat,color='orange',s=2)
+plt.title("origin range scatter")
+
+plt.subplot(414)
 plt.plot(y,color="blue",label='desired value')
 plt.plot(yhat,color='orange',label='predicted value')
 plt.legend(loc='upper right')
@@ -139,25 +169,41 @@ plt.show()
 
 
 
+
+
 yhat = trained_model.predict(test_x_scal)
 
 mseResult = mean_squared_error(test_y_scal,yhat)
 print("Mse of testing data : ",round(mseResult,5))
 
 plt.figure(1)
-plt.subplot(211)
+plt.subplot(411)
 plt.plot(test_y_scal,color="blue",label='desired value')
 plt.plot(yhat,color='orange',label='predicted value')
 plt.legend(loc='upper right')
-plt.title("zero mean range")
+plt.title("test samples-zero mean range")
+
+plt.subplot(412)
+test_x_scal = test_x_scal.reshape(test_x_scal.shape[0])
+
+plt.scatter(test_x_scal,test_y_scal,color="blue",s=2)
+plt.scatter(test_x_scal,yhat,color='orange',s=2)
+plt.title("test samples-zero mean range scatter")
 
 yhat = test_scalerY.inverse_transform(yhat)
 
-plt.subplot(212)
+plt.subplot(413)
+test_x = test_x.reshape(test_x.shape[0])
+
+plt.scatter(test_x,test_y,color="blue",s=2)
+plt.scatter(test_x,yhat,color='orange',s=2)
+plt.title("test samples-origin range scatter")
+
+plt.subplot(414)
 plt.plot(test_y,color="blue",label='desired value')
 plt.plot(yhat,color='orange',label='predicted value')
 plt.legend(loc='upper right')
-plt.title("origin range")
+plt.title("test samples-eorigin range")
 
 plt.show()
 
